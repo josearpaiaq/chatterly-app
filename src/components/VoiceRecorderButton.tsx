@@ -1,59 +1,41 @@
 // components/VoiceRecorderButton.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Mic, MicOff } from "lucide-react";
 
-// 👇 Esto lo puedes poner al inicio del archivo o en types.d.ts
-type SpeechRecognition = any;
-type SpeechRecognitionEvent = any;
+const SpeechRecognition = new (window.SpeechRecognition ||
+  window.webkitSpeechRecognition)();
+
+SpeechRecognition.continuous = true;
+SpeechRecognition.lang = "en-US";
 
 export default function VoiceRecorderButton() {
   const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(
-    null
-  );
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recog = new SpeechRecognition();
-        recog.lang = "es-ES";
-        recog.continuous = false;
-        recog.interimResults = false;
-        recog.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript;
-          console.log("Transcripción:", transcript);
-          // Aquí puedes enviar el texto a tu backend o a la IA
-        };
-        recog.onend = () => {
-          setIsRecording(false);
-        };
-        setRecognition(recog);
-      } else {
-        alert("Tu navegador no soporta SpeechRecognition 😥");
-      }
-    }
-  }, []);
+  const startRecording = () => {
+    setIsRecording(true);
+    SpeechRecognition.start();
 
-  const toggleRecording = () => {
-    if (!recognition) return;
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-    } else {
-      recognition.start();
-      setIsRecording(true);
-    }
+    SpeechRecognition.addEventListener("result", handleSpeechResult);
+  };
+
+  const handleSpeechResult = (event: SpeechRecognitionEvent) => {
+    const transcript = event.results[0][0].transcript;
+    console.log(transcript);
+    // Aquí puedes enviar la transcripción a tu IA o hacer lo que necesites con ella
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+
+    SpeechRecognition.stop();
   };
 
   return (
     <button
-      onClick={toggleRecording}
-      className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300
+      onClick={isRecording ? stopRecording : startRecording}
+      className={`w-80 h-80 rounded-full flex items-center justify-center transition-all duration-300
         ${
           isRecording
             ? "bg-red-500 animate-pulse shadow-lg"
@@ -62,9 +44,9 @@ export default function VoiceRecorderButton() {
       `}
     >
       {isRecording ? (
-        <MicOff className="text-white" size={28} />
+        <MicOff className="text-white" size={48} />
       ) : (
-        <Mic className="text-white" size={28} />
+        <Mic className="text-white" size={48} />
       )}
     </button>
   );
