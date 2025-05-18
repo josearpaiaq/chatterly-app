@@ -10,6 +10,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { neobrutalism } from "@clerk/themes";
+import BurgerMenu from "@/components/BurgerMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,22 +43,27 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col`}
         >
-          <header className="flex justify-end items-center p-4 gap-4">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <span className="text-sm font-bold cursor-pointer">
-                  Inicia sesión
-                </span>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <span className="text-sm font-bold cursor-pointer">
-                  Registrarse
-                </span>
-              </SignUpButton>
-            </SignedOut>
+          <header className="flex justify-between items-center p-4 gap-4">
             <SignedIn>
-              <UserButton />
+              <BurgerMenu />
             </SignedIn>
+            <div className="flex justify-end items-center gap-4">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <span className="text-sm font-bold cursor-pointer">
+                    Inicia sesión
+                  </span>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <span className="text-sm font-bold cursor-pointer">
+                    Registrarse
+                  </span>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
           </header>
 
           <main className="flex-1 w-full overflow-y-auto">{children}</main>
