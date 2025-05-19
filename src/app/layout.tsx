@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
-import { neobrutalism } from "@clerk/themes";
-import BurgerMenu from "@/components/BurgerMenu";
+import { ClerkProvider } from "@clerk/nextjs";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,38 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: neobrutalism,
-      }}
-    >
+    <ClerkProvider>
       <html lang="es">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col`}
         >
-          <header className="flex justify-between items-center p-4 gap-4">
-            <SignedIn>
-              <BurgerMenu />
-            </SignedIn>
-            <div className="flex justify-end items-center gap-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <span className="text-sm font-bold cursor-pointer">
-                    Inicia sesión
-                  </span>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <span className="text-sm font-bold cursor-pointer">
-                    Registrarse
-                  </span>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </header>
-
+          <Navbar />
           <main className="flex-1 w-full overflow-y-auto">{children}</main>
         </body>
       </html>

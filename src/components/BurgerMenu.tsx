@@ -1,10 +1,10 @@
-"use client";
-
-import { useState } from "react";
-
-export default function BurgerMenu() {
-  const [isOpen, setIsOpen] = useState(false);
-
+export default function BurgerMenu({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}) {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
