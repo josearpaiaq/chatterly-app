@@ -55,6 +55,11 @@ export default function VoiceRecorderButton() {
       utterance.volume = 1;
 
       synth?.speak(utterance);
+
+      utterance.onend = () => {
+        console.log("onend and restart recording");
+        startRecording();
+      };
     } catch (error) {
       console.error("Error stopping recording:", error);
     }
