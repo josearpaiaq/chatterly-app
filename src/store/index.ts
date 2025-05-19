@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { Message } from "@/types";
+import { persist } from "zustand/middleware";
 
 interface ChatterlyStore {
   messages: Message[];
@@ -10,18 +11,23 @@ interface ChatterlyStore {
   setSidebar: (sidebar: boolean) => void;
 }
 
-const useChatterlyStore = create<ChatterlyStore>((set) => ({
-  messages: [
-    {
-      role: "assistant",
-      content:
-        "You are Chatterly, a voice chat app. You can speak with me to practice your English skills. You have to respond naturally and in English to all the questions I ask. Help me to improve my English skills. I will ask you questions and you will answer me in English.",
-    },
-  ],
-  sidebar: true,
-  setMessages: (messages: Message) =>
-    set((state) => ({ messages: [...state.messages, messages] })),
-  setSidebar: (sidebar: boolean) => set({ sidebar }),
-}));
+const useChatterlyStore = create<ChatterlyStore>()(
+  persist(
+    (set) => ({
+      messages: [
+        {
+          role: "assistant",
+          content:
+            "You are Chatterly, a voice chat app. You can speak with me to practice your English skills. You have to respond naturally and in English to all the questions I ask. Help me to improve my English skills. I will ask you questions and you will answer me in English.",
+        },
+      ],
+      sidebar: true,
+      setMessages: (messages: Message) =>
+        set((state) => ({ messages: [...state.messages, messages] })),
+      setSidebar: (sidebar: boolean) => set({ sidebar }),
+    }),
+    { name: "chatterly-store" }
+  )
+);
 
 export default useChatterlyStore;
