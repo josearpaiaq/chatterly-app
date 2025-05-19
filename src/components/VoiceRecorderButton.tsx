@@ -31,11 +31,8 @@ export default function VoiceRecorderButton() {
   const handleSpeechResult = async (event: SpeechRecognitionEvent) => {
     try {
       const transcript = event.results[0][0].transcript;
-      console.log(transcript);
 
       setMessages({ role: "user", content: transcript });
-
-      // Aquí puedes enviar la transcripción a tu IA o hacer lo que necesites con ella
 
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -47,7 +44,7 @@ export default function VoiceRecorderButton() {
 
       const { result } = await res.json();
 
-      console.log({ result });
+      // console.log({ result });
 
       setMessages({ role: "assistant", content: result });
 
