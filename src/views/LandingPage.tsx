@@ -10,7 +10,7 @@ export default function LandingPage() {
 
       <SignInButton mode="modal">
         <span className="text-sm mt-2 font-bold cursor-pointer bg-amber-50 border-0 border-amber-500 rounded px-4 py-2 text-amber-950 hover:bg-amber-100 transition-all duration-300">
-          Start your journey
+          Start here
         </span>
       </SignInButton>
     </div>

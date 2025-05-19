@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📘 Chatterly App
 
-## Getting Started
+## 🗣️ Chatterly — Practice English with AI Conversations
 
-First, run the development server:
+Chatterly is a voice-based web application designed to help users improve their spoken English by conversing with an AI in real-time. Using speech recognition and synthesis, it provides an interactive and immersive learning experience directly in the browser.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Live Preview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[Chatterly App online now](https://chatterly-app.vercel.app/)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js — React framework for building the frontend
+- TailwindCSS — Utility-first CSS framework, styled with a neobrutalist UI
+- Clerk — Authentication (Email/password, Google, GitHub, Twitch, etc.)
+- Zustand — Lightweight global state management
+- Web Speech API
+- SpeechRecognition — Converts user voice into text
+- SpeechSynthesis — Converts AI text replies into spoken responses
+- Supabase (soon) — Will store conversations, context, and user metadata
 
-## Learn More
+## 📦 Features
 
-To learn more about Next.js, take a look at the following resources:
+- 🎤 Voice input via browser-native SpeechRecognition
+- 🧠 AI-based conversation with initial context to simulate natural chat
+- 🔊 Text-to-Speech replies from the assistant
+- ✅ Authentication with Clerk (OAuth + email/password)
+- 💬 Chat UI with real-time scroll and neobrutalist visual style
+- 💾 State managed with Zustand
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Features to Come
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 🌍 Multilingual support — Practice in other languages besides English
+- 🎙️ Advanced voice options — Different tones, genders, and languages
+- 🧠 Conversation context persistence — Save past chats with Supabase
+- 🌘 Dark mode
+- 🔐 Protected pages for user-specific content using Clerk auth
+- 📊 Progress tracking dashboard
+- 📁 Organized conversation history
+- 🎯 Conversation themes & levels (Beginner, Travel, Business…)
