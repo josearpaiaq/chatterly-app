@@ -3,6 +3,8 @@
 import VoiceRecorderButton from "@/components/VoiceRecorderButton";
 import useChatterlyStore from "@/store";
 
+export const dynamic = "force-dynamic";
+
 export default function Chat() {
   const { sidebar, messages } = useChatterlyStore();
 

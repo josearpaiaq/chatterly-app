@@ -1,17 +1,26 @@
-import Chat from "@/pages/ChatPage";
-import LandingPage from "@/pages/LandingPage";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import Chat from "@/views/ChatPage";
+import LandingPage from "@/views/LandingPage";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
+import "@/styles/bg-animation.css";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center h-full w-screen bg-gray-600">
-      <SignedOut>
-        <LandingPage />
-      </SignedOut>
+    <ClerkProvider>
+      <div className="bg-animation">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+        <div id="stars4"></div>
+        <div className="flex flex-col items-center justify-center h-full w-screen">
+          <SignedOut>
+            <LandingPage />
+          </SignedOut>
 
-      <SignedIn>
-        <Chat />
-      </SignedIn>
-    </div>
+          <SignedIn>
+            <Chat />
+          </SignedIn>
+        </div>
+      </div>
+    </ClerkProvider>
   );
 }

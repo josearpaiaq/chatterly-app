@@ -1,36 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import { Mic, MicOff } from "lucide-react";
-import synth from "@/lib/synthesis";
 import { LANG } from "@/lib/constants";
 import useChatterlyStore from "@/store";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
-const SpeechRecognition = new (window?.SpeechRecognition ||
-  window?.webkitSpeechRecognition)();
-
-synth?.stopSpeaking();
-
-SpeechRecognition.continuous = true;
-SpeechRecognition.lang = LANG;
+const synth = window.speechSynthesis;
+synth?.cancel();
 
 export default function VoiceRecorderButton() {
-  const [isRecording, setIsRecording] = useState(false);
   const { messages, setMessages } = useChatterlyStore();
+  const {
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    transcript,
+  } = useSpeechRecognition();
+
+  if (!browserSupportsSpeechRecognition) {
+    return <div>Your browser does not support speech recognition.</div>;
+  }
 
   const startRecording = () => {
-    setIsRecording(true);
-
-    synth?.stopSpeaking();
-
-    SpeechRecognition.start();
-
-    SpeechRecognition.addEventListener("result", handleSpeechResult);
+    resetTranscript();
+    SpeechRecognition.startListening({ continuous: true, language: LANG });
   };
 
-  const handleSpeechResult = async (event: SpeechRecognitionEvent) => {
+  const stopRecording = async () => {
     try {
-      const transcript = event.results[0][0].transcript;
+      SpeechRecognition.stopListening();
+
+      const newMessages = [...messages, { role: "user", content: transcript }];
 
       setMessages({ role: "user", content: transcript });
 
@@ -39,43 +41,41 @@ export default function VoiceRecorderButton() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({ messages: newMessages }),
       });
 
       const { result } = await res.json();
 
-      // console.log({ result });
-
       setMessages({ role: "assistant", content: result });
 
-      synth?.startSpeaking(result);
+      const utterance = new SpeechSynthesisUtterance(result);
+      utterance.lang = LANG;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      synth?.speak(utterance);
     } catch (error) {
-      console.error("Error handling speech result:", error);
+      console.error("Error stopping recording:", error);
     }
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-
-    SpeechRecognition.stop();
-  };
-
   return (
-    <button
-      onClick={isRecording ? stopRecording : startRecording}
+    <div
+      onClick={listening ? stopRecording : startRecording}
       className={`w-60 h-60 sm:w-80 sm:h-80 rounded-full flex items-center justify-center transition-all duration-300
         ${
-          isRecording
+          listening
             ? "bg-red-500 animate-pulse shadow-lg"
             : "bg-blue-500 hover:bg-blue-600 shadow"
         }
       `}
     >
-      {isRecording ? (
+      {listening ? (
         <MicOff className="text-white" size={48} />
       ) : (
         <Mic className="text-white" size={48} />
       )}
-    </button>
+    </div>
   );
 }
