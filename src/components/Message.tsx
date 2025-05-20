@@ -1,4 +1,5 @@
 import { Trash, Volume2 } from "lucide-react";
+import { playMessage } from "@/lib/synthesis";
 
 export default function Message({
   role,
@@ -18,7 +19,11 @@ export default function Message({
       <p className="text-white">{message || "..."}</p>
 
       <div className="flex justify-end items-center mt-2 gap-1">
-        <Volume2 className="text-white cursor-pointer" size={16} />
+        <Volume2
+          className="text-white cursor-pointer"
+          size={16}
+          onClick={() => playMessage(message)}
+        />
         <Trash
           className="text-white cursor-pointer"
           size={16}

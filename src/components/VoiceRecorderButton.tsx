@@ -6,9 +6,7 @@ import useChatterlyStore from "@/store";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-
-const synth = window.speechSynthesis;
-synth?.cancel();
+import { cancalPlayMessage, playMessage } from "@/lib/synthesis";
 
 export default function VoiceRecorderButton() {
   const { messages, setMessages } = useChatterlyStore();
@@ -49,25 +47,17 @@ export default function VoiceRecorderButton() {
 
       setMessages({ role: "assistant", content: result });
 
-      const utterance = new SpeechSynthesisUtterance(result);
-      utterance.lang = LANG;
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      synth?.speak(utterance);
-
-      utterance.onend = () => {
+      playMessage(result, () => {
         console.log("onend and restart recording");
         startRecording();
-      };
+      });
     } catch (error) {
       console.error("Error stopping recording:", error);
     }
   };
 
   const handlePause = () => {
-    synth?.cancel();
+    cancalPlayMessage();
     SpeechRecognition.stopListening();
   };
 

@@ -1,11 +1,8 @@
-import { LANG } from "@/lib/constants";
 import useChatterlyStore from "@/store";
 import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import Message from "./Message";
-
-const synth = window.speechSynthesis;
-synth?.cancel();
+import { playMessage } from "@/lib/synthesis";
 
 export default function SideChat() {
   const { sidebar, messages, setMessages, deleteMessage } = useChatterlyStore();
@@ -36,13 +33,7 @@ export default function SideChat() {
 
         setMessages({ role: "assistant", content: result });
 
-        const utterance = new SpeechSynthesisUtterance(result);
-        utterance.lang = LANG;
-        utterance.rate = 1;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-
-        synth?.speak(utterance);
+        playMessage(result);
 
         setCurrentMessage("");
       }
@@ -121,7 +112,7 @@ export default function SideChat() {
       )}
 
       <form
-        className="sticky bottom-0 right-0 flex justify-center items-center w-full gap-1 mt-4"
+        className="sticky bottom-0 right-0 flex justify-center items-center w-full gap-1 mt-4 px-2"
         onSubmit={handleSubmit}
       >
         <input
