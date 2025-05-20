@@ -33,7 +33,9 @@ export default function Chat() {
         ref={scrollRef}
       >
         <div className="absolute left-1.5 top-1.5 bg-transparent p-1">
-          <h1 className="text-4xl font-bold text-white">Chatterly Chat</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-white">
+            Chatterly Chat
+          </h1>
         </div>
         <div className="pt-8">
           {messages

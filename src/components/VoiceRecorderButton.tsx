@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, Pause } from "lucide-react";
 import { LANG } from "@/lib/constants";
 import useChatterlyStore from "@/store";
 import SpeechRecognition, {
@@ -17,6 +17,7 @@ export default function VoiceRecorderButton() {
     resetTranscript,
     browserSupportsSpeechRecognition,
     transcript,
+    // finalTranscript,
   } = useSpeechRecognition();
 
   if (!browserSupportsSpeechRecognition) {
@@ -65,22 +66,40 @@ export default function VoiceRecorderButton() {
     }
   };
 
+  const handlePause = () => {
+    synth?.cancel();
+    SpeechRecognition.stopListening();
+  };
+
   return (
-    <div
-      onClick={listening ? stopRecording : startRecording}
-      className={`cursor-pointer w-60 h-60 sm:w-80 sm:h-80 rounded-full flex items-center justify-center transition-all duration-300
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <div
+        onClick={listening ? stopRecording : startRecording}
+        className={`cursor-pointer w-60 h-60 sm:w-80 sm:h-80 rounded-full flex items-center justify-center transition-all duration-300
         ${
           listening
             ? "bg-red-500 animate-pulse shadow-lg"
             : "bg-blue-500 hover:bg-blue-600 shadow"
         }
       `}
-    >
-      {listening ? (
-        <MicOff className="text-white" size={48} />
-      ) : (
-        <Mic className="text-white" size={48} />
-      )}
+      >
+        {listening ? (
+          <MicOff className="text-white" size={48} />
+        ) : (
+          <Mic className="text-white" size={48} />
+        )}
+      </div>
+
+      <div className="text-center text-sm text-gray-500 mt-6 sm:mt-2">
+        <Pause
+          className="text-white cursor-pointer"
+          size={28}
+          onClick={handlePause}
+        />
+      </div>
+
+      {/* <div>transcript: {transcript}</div>
+      <div>finalTranscript: {finalTranscript}</div> */}
     </div>
   );
 }
