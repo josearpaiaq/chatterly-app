@@ -6,15 +6,14 @@ Chatterly is a voice-based web application designed to help users improve their 
 
 ## 🚀 Live Preview
 
-[Chatterly App online now](https://chatterly-app.vercel.app/)
+[Chatterly App online now](https://chatterly.lat)
 
 ## 🛠️ Tech Stack
 
 - Next.js — React framework for building the frontend
-- TailwindCSS — Utility-first CSS framework, styled with a neobrutalist UI
+- TailwindCSS — Utility-first CSS framework
 - Clerk — Authentication (Email/password, Google, GitHub, Twitch, etc.)
 - Zustand — Lightweight global state management
-- Web Speech API
 - SpeechRecognition — Converts user voice into text
 - SpeechSynthesis — Converts AI text replies into spoken responses
 - Supabase (soon) — Will store conversations, context, and user metadata
@@ -25,7 +24,6 @@ Chatterly is a voice-based web application designed to help users improve their 
 - 🧠 AI-based conversation with initial context to simulate natural chat
 - 🔊 Text-to-Speech replies from the assistant
 - ✅ Authentication with Clerk (OAuth + email/password)
-- 💬 Chat UI with real-time scroll and neobrutalist visual style
 - 💾 State managed with Zustand
 
 ## ✨ Features to Come
@@ -35,6 +33,5 @@ Chatterly is a voice-based web application designed to help users improve their 
 - 🧠 Conversation context persistence — Save past chats with Supabase
 - 🌘 Dark mode
 - 🔐 Protected pages for user-specific content using Clerk auth
-- 📊 Progress tracking dashboard
 - 📁 Organized conversation history
 - 🎯 Conversation themes & levels (Beginner, Travel, Business…)
