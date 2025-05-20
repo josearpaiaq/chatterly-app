@@ -9,6 +9,7 @@ interface ChatterlyStore {
   sidebar: boolean;
   setMessages: (messages: Message) => void;
   setSidebar: (sidebar: boolean) => void;
+  deleteMessage: (content: string) => void;
 }
 
 const useChatterlyStore = create<ChatterlyStore>()(
@@ -32,9 +33,15 @@ const useChatterlyStore = create<ChatterlyStore>()(
         },
       ],
       sidebar: true,
-      setMessages: (messages: Message) =>
-        set((state) => ({ messages: [...state.messages, messages] })),
+      setMessages: (message: Message) =>
+        set((state) => ({ messages: [...state.messages, message] })),
       setSidebar: (sidebar: boolean) => set({ sidebar }),
+      deleteMessage: (content: string) =>
+        set((state) => ({
+          messages: state.messages.filter(
+            (message) => message.content !== content
+          ),
+        })),
     }),
     { name: "chatterly-store" }
   )

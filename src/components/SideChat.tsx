@@ -2,12 +2,13 @@ import { LANG } from "@/lib/constants";
 import useChatterlyStore from "@/store";
 import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
+import Message from "./Message";
 
 const synth = window.speechSynthesis;
 synth?.cancel();
 
 export default function SideChat() {
-  const { sidebar, messages, setMessages } = useChatterlyStore();
+  const { sidebar, messages, setMessages, deleteMessage } = useChatterlyStore();
   const [currentMessage, setCurrentMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -50,6 +51,10 @@ export default function SideChat() {
     }
   };
 
+  const onDeleteMessage = (content: string) => {
+    deleteMessage(content);
+  };
+
   useEffect(() => {
     const container = scrollRef.current;
     if (container && sidebar) {
@@ -76,44 +81,32 @@ export default function SideChat() {
           Chatterly Chat
         </h1>
       </div>
-      <div className="pt-8 h-max flex flex-col items-center justify-start overflow-auto">
-        {messages
-          .filter((_, i) => i !== 0)
-          .map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              } w-full`}
-            >
-              <div
-                className={`flex flex-col justify-center p-4 rounded-lg my-2 max-w-[75%] ${
-                  message.role === "user" ? "bg-blue-500" : "bg-green-500"
-                }`}
-              >
-                <p className="text-white">{message.content || "..."}</p>
-              </div>
-            </div>
-          ))}
-      </div>
 
-      <form
-        className="sticky bottom-0 right-0 flex justify-center items-center w-full gap-1"
-        onSubmit={handleSubmit}
-      >
-        <input
-          type="text"
-          placeholder="Type your message..."
-          className="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={(e) => setCurrentMessage(e.target.value)}
-        />
-        <button
-          className="bg-gray-800 text-white rounded-lg px-4 py-2"
-          type="submit"
+      {messages.filter((_, i) => i !== 0).length !== 0 && (
+        <div
+          className={[
+            " h-max flex flex-col items-center justify-start overflow-auto",
+            messages.length === 1 ? "pt-8" : "",
+          ].join(" ")}
         >
-          <Send className="text-white" size={24} />
-        </button>
-      </form>
+          {messages
+            .filter((_, i) => i !== 0)
+            .map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                } w-full`}
+              >
+                <Message
+                  role={message.role}
+                  message={message.content}
+                  onDelete={() => onDeleteMessage(message.content)}
+                />
+              </div>
+            ))}
+        </div>
+      )}
 
       {messages.filter((_, i) => i !== 0).length === 0 && (
         <>
@@ -126,6 +119,25 @@ export default function SideChat() {
           </p>
         </>
       )}
+
+      <form
+        className="sticky bottom-0 right-0 flex justify-center items-center w-full gap-1 mt-4"
+        onSubmit={handleSubmit}
+      >
+        <input
+          type="text"
+          placeholder="Type your message..."
+          className="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={currentMessage}
+          onChange={(e) => setCurrentMessage(e.target.value)}
+        />
+        <button
+          className="bg-gray-800 text-white rounded-lg px-4 py-2"
+          type="submit"
+        >
+          <Send className="text-white" size={24} />
+        </button>
+      </form>
     </div>
   );
 }
