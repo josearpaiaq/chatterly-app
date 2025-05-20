@@ -21,6 +21,8 @@ export default function SideChat() {
 
         setMessages({ role: "user", content: currentMessage });
 
+        setCurrentMessage("");
+
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: {
@@ -34,8 +36,6 @@ export default function SideChat() {
         setMessages({ role: "assistant", content: result });
 
         playMessage(result);
-
-        setCurrentMessage("");
       }
     } catch (error) {
       console.error("Error submitting message:", error);
@@ -123,7 +123,7 @@ export default function SideChat() {
           onChange={(e) => setCurrentMessage(e.target.value)}
         />
         <button
-          className="bg-gray-800 text-white rounded-lg px-4 py-2"
+          className="bg-green-500 text-white rounded-lg px-4 py-2"
           type="submit"
         >
           <Send className="text-white" size={24} />
