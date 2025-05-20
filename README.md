@@ -16,6 +16,7 @@ Chatterly is a voice-based web application designed to help users improve their 
 - Zustand — Lightweight global state management
 - SpeechRecognition — Converts user voice into text
 - SpeechSynthesis — Converts AI text replies into spoken responses
+- OpenAI api — Provides AI-based conversation
 - Supabase (soon) — Will store conversations, context, and user metadata
 
 ## 📦 Features
@@ -31,7 +32,7 @@ Chatterly is a voice-based web application designed to help users improve their 
 - 🌍 Multilingual support — Practice in other languages besides English
 - 🎙️ Advanced voice options — Different tones, genders, and languages
 - 🧠 Conversation context persistence — Save past chats with Supabase
-- 🌘 Dark mode
+- 🌘 Light/Dark mode
 - 🔐 Protected pages for user-specific content using Clerk auth
 - 📁 Organized conversation history
 - 🎯 Conversation themes & levels (Beginner, Travel, Business…)
