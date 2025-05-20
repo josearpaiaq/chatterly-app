@@ -68,7 +68,7 @@ export default function VoiceRecorderButton() {
   return (
     <div
       onClick={listening ? stopRecording : startRecording}
-      className={`w-60 h-60 sm:w-80 sm:h-80 rounded-full flex items-center justify-center transition-all duration-300
+      className={`cursor-pointer w-60 h-60 sm:w-80 sm:h-80 rounded-full flex items-center justify-center transition-all duration-300
         ${
           listening
             ? "bg-red-500 animate-pulse shadow-lg"
