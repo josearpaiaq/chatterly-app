@@ -21,8 +21,13 @@ export default function Navbar() {
             {/* <BurgerMenu isOpen={false} setIsOpen={() => {}} /> */}
           </div>
 
-          <h1 className="text-2xl font-bold text-white">Chatterly App</h1>
-          <UserButton />
+          <div>
+            <h1 className="text-2xl font-bold text-white">Chatterly App</h1>
+          </div>
+
+          <div>
+            <UserButton />
+          </div>
         </div>
       </SignedIn>
     </header>
