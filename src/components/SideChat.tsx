@@ -49,9 +49,8 @@ export default function SideChat() {
   useEffect(() => {
     const container = scrollRef.current;
     if (container && sidebar) {
-      // container.scrollTop = container.scrollHeight;
       container.scrollTo({
-        top: container.scrollHeight,
+        top: container.scrollHeight + 10,
         behavior: "smooth",
       });
     }
