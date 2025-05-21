@@ -66,10 +66,8 @@ export default function SideChat() {
       style={{ transitionProperty: "width, opacity" }}
       ref={scrollRef}
     >
-      <div className="sticky left-1.5 top-1.5 bg-transparent p-1">
-        <h1 className="text-lg sm:text-2xl font-bold text-white">
-          Chatterly Chat
-        </h1>
+      <div className="sticky left-1.5 -top-4.5 p-1 w-full bg-gray-900 ">
+        <h1 className="text-lg sm:text-2xl font-bold text-white">Chat</h1>
       </div>
 
       {messages.filter((_, i) => i !== 0).length !== 0 && (
