@@ -1,49 +1,62 @@
+"use client";
+
 import useChatterlyStore from "@/store";
 import { useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import Message from "./Message";
 import { playMessage } from "@/lib/synthesis";
 
 export default function SideChat() {
   const { sidebar, messages, setMessages, deleteMessage } = useChatterlyStore();
   const [currentMessage, setCurrentMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!currentMessage.trim() || isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
     try {
-      if (currentMessage.trim() !== "") {
-        const newMessages = [
-          ...messages,
-          { role: "user", content: currentMessage },
-        ];
+      const userMessage = {
+        id: crypto.randomUUID(),
+        role: "user" as const,
+        content: currentMessage,
+      };
+      const newMessages = [...messages, userMessage];
 
-        setMessages({ role: "user", content: currentMessage });
+      setMessages(userMessage);
+      setCurrentMessage("");
 
-        setCurrentMessage("");
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: newMessages }),
-        });
-
-        const { result } = await res.json();
-
-        setMessages({ role: "assistant", content: result });
-
-        playMessage(result);
+      if (!res.ok) {
+        throw new Error("Failed to get response from AI");
       }
-    } catch (error) {
-      console.error("Error submitting message:", error);
-    }
-  };
 
-  const onDeleteMessage = (content: string) => {
-    deleteMessage(content);
+      const { result } = await res.json();
+
+      const assistantMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant" as const,
+        content: result,
+      };
+      setMessages(assistantMessage);
+      await playMessage(result);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error("Error submitting message:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -66,46 +79,49 @@ export default function SideChat() {
       style={{ transitionProperty: "width, opacity" }}
       ref={scrollRef}
     >
-      <div className="sticky left-1.5 -top-4.5 p-1 w-full bg-gray-900 ">
+      <div className="sticky left-1.5 -top-4.5 p-1 w-full bg-gray-900">
         <h1 className="text-lg sm:text-2xl font-bold text-white">Chat</h1>
       </div>
 
-      {messages.filter((_, i) => i !== 0).length !== 0 && (
+      {messages.filter((m) => m.role !== "system").length !== 0 && (
         <div
           className={[
-            " h-max flex flex-col items-center justify-start overflow-auto",
+            "h-max flex flex-col items-center justify-start overflow-auto",
             messages.length === 1 ? "pt-8" : "",
           ].join(" ")}
         >
           {messages
-            .filter((_, i) => i !== 0)
-            .map((message, index) => (
+            .filter((m) => m.role !== "system")
+            .map((message) => (
               <div
-                key={index}
+                key={message.id}
                 className={`flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 } w-full`}
               >
                 <Message
-                  role={message.role}
+                  role={message.role as "user" | "assistant"}
                   message={message.content}
-                  onDelete={() => onDeleteMessage(message.content)}
+                  onDelete={() => deleteMessage(message.id)}
                 />
               </div>
             ))}
         </div>
       )}
 
-      {messages.filter((_, i) => i !== 0).length === 0 && (
+      {messages.filter((m) => m.role !== "system").length === 0 && (
         <>
           <p className="text-white text-2xl mt-12 hidden sm:block">
             Start a conversation by clicking the 🎤 on the right.
           </p>
-
           <p className="text-white text-2xl mt-12 sm:hidden">
             Start a conversation by clicking the 🎤 after closing this chat.
           </p>
         </>
+      )}
+
+      {error && (
+        <p className="text-red-400 text-sm px-2 py-1 mt-2">{error}</p>
       )}
 
       <form
@@ -115,15 +131,21 @@ export default function SideChat() {
         <input
           type="text"
           placeholder="Type your message..."
-          className="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           value={currentMessage}
           onChange={(e) => setCurrentMessage(e.target.value)}
+          disabled={isLoading}
         />
         <button
-          className="bg-green-500 text-white rounded-lg px-4 py-2"
+          className="bg-green-500 text-white rounded-lg px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
           type="submit"
+          disabled={isLoading}
         >
-          <Send className="text-white" size={24} />
+          {isLoading ? (
+            <Loader2 className="text-white animate-spin" size={24} />
+          ) : (
+            <Send className="text-white" size={24} />
+          )}
         </button>
       </form>
     </div>

@@ -13,10 +13,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
   }
 
+  // How many recent conversation messages to keep (excluding system prompt)
+  const MAX_CONTEXT = 8;
+
   try {
+    const all = body.messages.map(({ role, content }) => ({ role, content }));
+
+    // Always include system prompt + last MAX_CONTEXT conversation messages
+    const [system, ...conversation] = all;
+    const trimmed = [system, ...conversation.slice(-MAX_CONTEXT)];
+
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: body.messages,
+      model: "llama-3.3-70b-versatile",
+      messages: trimmed,
     });
 
     const result = response.choices[0].message.content;
