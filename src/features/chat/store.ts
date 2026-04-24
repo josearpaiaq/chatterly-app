@@ -135,10 +135,13 @@ const useChatterlyStore = create<ChatterlyStore>()(
     {
       name: "chatterly-store",
       version: 3,
-      partialize: ({ isAISpeaking: _, setIsAISpeaking: __, ...rest }) => rest,
+      partialize: ({
+        // isAISpeaking: _isAISpeaking,
+        // setIsAISpeaking: _setIsAISpeaking,
+        ...rest
+      }) => rest,
       migrate: (persisted: unknown, version) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let s = persisted as any;
+        const s = persisted as any;
 
         if (version < 1) {
           s.messages = s.messages.map((m: Message) => ({
@@ -149,7 +152,7 @@ const useChatterlyStore = create<ChatterlyStore>()(
 
         if (version < 2) {
           s.messages = s.messages.filter(
-            (m: Message) => m.id !== "system-prompt"
+            (m: Message) => m.id !== "system-prompt",
           );
           s.messages.unshift({ ...SYSTEM_MESSAGE });
         }
@@ -158,8 +161,9 @@ const useChatterlyStore = create<ChatterlyStore>()(
           const oldMessages: Message[] = s.messages ?? [{ ...SYSTEM_MESSAGE }];
           const chat = makeChat({
             title:
-              oldMessages.find((m) => m.role === "user")?.content.slice(0, 50) ??
-              "New Chat",
+              oldMessages
+                .find((m) => m.role === "user")
+                ?.content.slice(0, 50) ?? "New Chat",
             messages: oldMessages,
           });
           return {
@@ -172,8 +176,8 @@ const useChatterlyStore = create<ChatterlyStore>()(
 
         return s;
       },
-    }
-  )
+    },
+  ),
 );
 
 export default useChatterlyStore;

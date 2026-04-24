@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import useChatterlyStore from "@/features/chat/store";
 import Message from "./Message";
@@ -13,7 +13,10 @@ interface Props {
 
 export default function ChatMessages({ compactMic = false }: Props) {
   const { chats, activeChatId, addMessage, deleteMessage, setIsAISpeaking } = useChatterlyStore();
-  const messages = chats.find((c) => c.id === activeChatId)?.messages ?? [];
+  const messages = useMemo(
+    () => chats.find((c) => c.id === activeChatId)?.messages ?? [],
+    [chats, activeChatId]
+  );
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
