@@ -42,3 +42,9 @@ body {
     background-position: 0% 50%;
   }
 }
+
+/* Keep mobile sheet below Navbar (z-50) and ConfirmModal (z-50) */
+.react-modal-sheet-backdrop,
+.react-modal-sheet-container {
+  z-index: 40 !important;
+}

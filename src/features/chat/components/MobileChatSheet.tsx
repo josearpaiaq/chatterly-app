@@ -1,66 +1,75 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Sheet } from "react-modal-sheet";
 import ChatNavigator from "./ChatNavigator";
 
 interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-const HANDLE_HEIGHT = 56;
+// Library requires snapPoints to start with 0 (closed) and end with 1 (full open)
+const SNAP_CLOSED = 0;
+const SNAP_PEEK = 1;
+const SNAP_FULL = 2;
 
 export default function MobileChatSheet({ onOpenChange }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
-  const touchStartY = useRef<number | null>(null);
+  const [snapIndex, setSnapIndex] = useState(SNAP_PEEK);
+  const [isMobile, setIsMobile] = useState(false);
+  const sheetRef = useRef<any>(null);
 
-  const toggle = (next: boolean) => {
-    setIsOpen(next);
-    onOpenChange(next);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const handleSnap = (index: number) => {
+    if (index === SNAP_CLOSED) {
+      // Sheet should never fully disappear — bounce back to peek
+      sheetRef.current?.snapTo(SNAP_PEEK);
+      return;
+    }
+    setSnapIndex(index);
+    onOpenChange(index === SNAP_FULL);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return;
-    const delta = touchStartY.current - e.changedTouches[0].clientY;
-    if (delta > 40) toggle(true);
-    else if (delta < -40) toggle(false);
-    touchStartY.current = null;
-  };
+  if (!isMobile) return null;
 
   return (
-    <div
-      className="md:hidden fixed left-0 right-0 bottom-0 z-40 bg-gray-900 rounded-t-2xl overflow-hidden"
-      style={{
-        height: "calc(100% - 64px)",
-        transform: isOpen
-          ? "translateY(0)"
-          : `translateY(calc(100% - ${HANDLE_HEIGHT}px))`,
-        transition: "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
-      }}
+    <Sheet
+      ref={sheetRef}
+      isOpen
+      onClose={() => sheetRef.current?.snapTo(SNAP_PEEK)}
+      snapPoints={[0, 56, 1]}
+      initialSnap={SNAP_PEEK}
+      onSnap={handleSnap}
     >
-      {/* Handle bar — swipe/tap target */}
-      <div
-        className="flex flex-col items-center pt-3 pb-2 cursor-pointer select-none shrink-0"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onClick={() => toggle(!isOpen)}
+      <Sheet.Container
+        style={{
+          backgroundColor: "#111827",
+          borderTopLeftRadius: "1rem",
+          borderTopRightRadius: "1rem",
+        }}
       >
-        <div className="w-10 h-1 rounded-full bg-gray-600 mb-2" />
-        {!isOpen && (
-          <span className="text-gray-400 text-xs tracking-wide">Your Chats</span>
-        )}
-      </div>
-
-      {/* Navigator fills remaining height */}
-      <div
-        className="overflow-hidden"
-        style={{ height: `calc(100% - ${HANDLE_HEIGHT}px)` }}
-      >
-        <ChatNavigator showMicInList compactMicInChat />
-      </div>
-    </div>
+        <Sheet.Header>
+          <div className="flex flex-col items-center pt-3 pb-1">
+            <Sheet.DragIndicator />
+            {snapIndex === SNAP_PEEK && (
+              <span className="text-gray-400 text-xs tracking-wide mt-1">
+                Your Chats
+              </span>
+            )}
+          </div>
+        </Sheet.Header>
+        <Sheet.Content
+          disableDrag={({ scrollPosition }) => scrollPosition !== "top"}
+        >
+          <ChatNavigator showMicInList compactMicInChat />
+        </Sheet.Content>
+      </Sheet.Container>
+    </Sheet>
   );
 }
