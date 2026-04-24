@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Pause } from "lucide-react";
-import useChatterlyStore from "@/store";
-import { cancelPlayMessage, playMessage } from "@/lib/synthesis";
+import useChatterlyStore from "@/features/chat/store";
+import { cancelPlayMessage, playMessage } from "@/features/voice/lib/synthesis";
 
 const SILENCE_THRESHOLD = 15;   // avg frequency amplitude (0–255)
 const SILENCE_DURATION_MS = 1800;
@@ -19,8 +19,12 @@ function getSupportedMimeType() {
   return candidates.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
 }
 
-export default function VoiceRecorderButton() {
-  const { setMessages } = useChatterlyStore();
+interface Props {
+  compact?: boolean;
+}
+
+export default function VoiceRecorderButton({ compact = false }: Props) {
+  const { addMessage } = useChatterlyStore();
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +37,10 @@ export default function VoiceRecorderButton() {
   const hasSpeechRef = useRef(false);
 
   // Always-current messages via store getter — avoids stale closure in callbacks
-  const getMessages = () => useChatterlyStore.getState().messages;
+  const getMessages = () => {
+    const { chats, activeChatId } = useChatterlyStore.getState();
+    return chats.find((c) => c.id === activeChatId)?.messages ?? [];
+  };
 
   const cleanup = () => {
     if (silenceIntervalRef.current) {
@@ -84,7 +91,7 @@ export default function VoiceRecorderButton() {
         role: "user" as const,
         content: text,
       };
-      setMessages(userMessage);
+      addMessage(userMessage);
 
       const generateRes = await fetch("/api/generate", {
         method: "POST",
@@ -96,17 +103,21 @@ export default function VoiceRecorderButton() {
 
       const { result } = await generateRes.json();
 
-      setMessages({
+      addMessage({
         id: crypto.randomUUID(),
         role: "assistant" as const,
         content: result,
       });
 
-      await playMessage(result, () => startRecording());
+      setIsLoading(false);
+      useChatterlyStore.getState().setIsAISpeaking(true);
+      playMessage(result, () => {
+        useChatterlyStore.getState().setIsAISpeaking(false);
+        startRecording();
+      });
     } catch (err) {
       setError("Something went wrong. Please try again.");
       console.error(err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -198,6 +209,31 @@ export default function VoiceRecorderButton() {
 
   // Cleanup on unmount
   useEffect(() => () => { cleanup(); stopRecorder(); }, []);
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isLoading}
+        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
+          isLoading
+            ? "bg-yellow-500 animate-pulse cursor-not-allowed"
+            : isListening
+            ? "bg-red-500 animate-pulse cursor-pointer"
+            : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+        }`}
+      >
+        {isLoading ? (
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        ) : isListening ? (
+          <MicOff className="text-white" size={18} />
+        ) : (
+          <Mic className="text-white" size={18} />
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">

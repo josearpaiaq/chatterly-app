@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import openai from "@/lib/openai";
-import { Message } from "@/types";
+import { Message } from "@/features/chat/types";
 
 interface GenerateRequest {
   messages: Message[];

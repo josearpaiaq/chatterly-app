@@ -1,5 +1,5 @@
-import Chat from "@/views/ChatPage";
-import LandingPage from "@/views/LandingPage";
+import Chat from "@/features/chat/ChatPage";
+import LandingPage from "@/features/landing/LandingPage";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 export default function Home() {
