@@ -1,9 +1,30 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/api/generate"]);
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect();
-});
+// import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+// const isProtectedRoute = createRouteMatcher(["/api/generate"]);
+// export default clerkMiddleware(async (auth, req) => {
+//   if (isProtectedRoute(req)) await auth.protect();
+// });
+
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Block API routes during maintenance
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Service under maintenance" },
+      { status: 503 }
+    );
+  }
+
+  // Redirect any non-root route to the maintenance page
+  if (pathname !== "/") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
