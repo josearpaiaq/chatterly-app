@@ -4,19 +4,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AppSettings, Chat, Message } from "@/features/chat/types";
 
-const SYSTEM_PROMPT = `You are Chatterly, a voice-based English conversation practice app.
-
-Rules:
-- Keep every response under 2 sentences. This is a voice app — brevity is critical.
-- English only. Plain text only — no markdown, no lists, no symbols.
-- End each response with one short follow-up question to keep the conversation going.
-- Gently correct grammar mistakes when relevant, in a natural way.
-- Never discuss explicit, illegal, or sensitive topics.`;
-
-const SYSTEM_MESSAGE: Message = {
+// Kept only for backward-compatible migration code (v<2, v<3).
+// The system prompt now lives server-side in /api/generate.
+const _LEGACY_SYSTEM_MESSAGE: Message = {
   id: "system-prompt",
   role: "system",
-  content: SYSTEM_PROMPT,
+  content: "",
 };
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -36,7 +29,7 @@ function makeChat(overrides?: Partial<Chat>): Chat {
     title: "New Chat",
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    messages: [{ ...SYSTEM_MESSAGE }],
+    messages: [],
     ...overrides,
   };
 }
@@ -134,43 +127,59 @@ const useChatterlyStore = create<ChatterlyStore>()(
     }),
     {
       name: "chatterly-store",
-      version: 3,
+      version: 4,
       partialize: ({
         // isAISpeaking: _isAISpeaking,
         // setIsAISpeaking: _setIsAISpeaking,
         ...rest
       }) => rest,
       migrate: (persisted: unknown, version) => {
-        const s = persisted as any;
+        let s = persisted as any;
 
         if (version < 1) {
-          s.messages = s.messages.map((m: Message) => ({
-            ...m,
-            id: m.id ?? crypto.randomUUID(),
-          }));
+          s = {
+            ...s,
+            messages: (s.messages ?? []).map((m: Message) => ({
+              ...m,
+              id: m.id ?? crypto.randomUUID(),
+            })),
+          };
         }
 
         if (version < 2) {
-          s.messages = s.messages.filter(
-            (m: Message) => m.id !== "system-prompt",
-          );
-          s.messages.unshift({ ...SYSTEM_MESSAGE });
+          const msgs: Message[] = s.messages ?? [];
+          s = {
+            ...s,
+            messages: [
+              { ..._LEGACY_SYSTEM_MESSAGE },
+              ...msgs.filter((m: Message) => m.id !== "system-prompt"),
+            ],
+          };
         }
 
         if (version < 3) {
-          const oldMessages: Message[] = s.messages ?? [{ ...SYSTEM_MESSAGE }];
+          const oldMessages: Message[] = s.messages ?? [];
           const chat = makeChat({
             title:
-              oldMessages
-                .find((m) => m.role === "user")
-                ?.content.slice(0, 50) ?? "New Chat",
+              oldMessages.find((m: Message) => m.role === "user")?.content.slice(0, 50) ??
+              "New Chat",
             messages: oldMessages,
           });
-          return {
+          s = {
             chats: [chat],
             activeChatId: chat.id,
             settings: DEFAULT_SETTINGS,
             sidebar: s.sidebar ?? true,
+          };
+        }
+
+        if (version < 4) {
+          s = {
+            ...s,
+            chats: (s.chats ?? []).map((c: Chat) => ({
+              ...c,
+              messages: c.messages.filter((m: Message) => m.role !== "system"),
+            })),
           };
         }
 
