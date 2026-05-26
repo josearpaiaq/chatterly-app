@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY!;
-const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION!;
+const GROQ_API_KEY = process.env.GROQ_API_KEY!;
 
 export async function POST(request: Request) {
   const { text } = await request.json();
@@ -10,54 +9,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Text is required" }, { status: 400 });
   }
 
-  if (!AZURE_SPEECH_KEY || !AZURE_SPEECH_REGION) {
+  if (!GROQ_API_KEY) {
     return NextResponse.json(
-      { error: "Azure Speech not configured" },
-      { status: 500 }
+      { error: "Groq API not configured" },
+      { status: 500 },
     );
   }
 
-  const escaped = text.replace(
-    /[<>&'"]/g,
-    (c: string) =>
-      ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c] ?? c)
-  );
-
-  const ssml = `
-    <speak version='1.0'
-      xmlns='http://www.w3.org/2001/10/synthesis'
-      xmlns:mstts='http://www.w3.org/2001/mstts'
-      xml:lang='en-US'>
-      <voice name='en-US-AriaNeural'>
-        <mstts:express-as style='chat'>
-          <prosody rate='5%' pitch='0%'>
-            ${escaped}
-          </prosody>
-        </mstts:express-as>
-      </voice>
-    </speak>
-  `;
-
   try {
-    const res = await fetch(
-      `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`,
-      {
-        method: "POST",
-        headers: {
-          "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-          "Content-Type": "application/ssml+xml",
-          "X-Microsoft-OutputFormat": "audio-24khz-160kbitrate-mono-mp3",
-        },
-        body: ssml,
-      }
-    );
+    const res = await fetch("https://api.groq.com/openai/v1/audio/speech", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "canopylabs/orpheus-v1-english",
+        voice: "autumn",
+        input: text,
+        response_format: "wav",
+      }),
+    });
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("Azure TTS error:", res.status, errorText);
+      console.error("Groq TTS error:", res.status, errorText);
       return NextResponse.json(
-        { error: "Azure TTS request failed" },
-        { status: res.status }
+        { error: "Groq TTS request failed" },
+        { status: res.status },
       );
     }
 
